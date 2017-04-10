@@ -16,14 +16,11 @@ public class HuffmanInfo {
     private int times = 1;
     private float weight = 0.0f;
     private String code;
-    private StringBuilder huffmanCode;
+    private String huffmanCode;
     private String leftChild = null;
     private String rightChild = null;
     private String parent = null;
 
-    public HuffmanInfo() {
-        total++;
-    }
 
     public HuffmanInfo(String code) {
         this.code = code;
@@ -46,7 +43,7 @@ public class HuffmanInfo {
         if (times != that.times) return false;
         if (Float.compare(that.weight, weight) != 0) return false;
         if (!code.equals(that.code)) return false;
-        if (huffmanCode != null ? !huffmanCode.toString().equals(that.huffmanCode.toString()) : that.huffmanCode != null) return false;
+        if (huffmanCode != null ? !huffmanCode.equals(that.huffmanCode) : that.huffmanCode != null) return false;
         if (leftChild != null ? !leftChild.equals(that.leftChild) : that.leftChild != null) return false;
         if (rightChild != null ? !rightChild.equals(that.rightChild) : that.rightChild != null) return false;
         return parent != null ? parent.equals(that.parent) : that.parent == null;
@@ -68,16 +65,7 @@ public class HuffmanInfo {
      * 测试用
      */
     @Deprecated
-    public HuffmanInfo(float weight, StringBuilder huffmanCode) {
-        this.weight = weight;
-        this.huffmanCode = huffmanCode;
-    }
-
-    /**
-     * 测试用
-     */
-    @Deprecated
-    public HuffmanInfo(int times, float weight, String code, StringBuilder huffmanCode, String leftChild, String rightChild, String parent) {
+    public HuffmanInfo(int times, float weight, String code, String huffmanCode, String leftChild, String rightChild, String parent) {
         this.times = times;
         this.weight = weight;
         this.code = code;

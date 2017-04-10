@@ -100,47 +100,29 @@ public class Encode {
         HuffmanInfo huffmanInfo = huffmanTree.get(root);
         //只有一个节点
         if (huffmanTree.get(huffmanInfo.getLeftChild()) == null) {
-            huffmanInfo.setHuffmanCode(new StringBuilder("0"));
+            huffmanInfo.setHuffmanCode("0");
             return;
         }
         String leftChild = huffmanInfo.getLeftChild();
         String rightChild = huffmanInfo.getRightChild();
-        setCodeInHuffmanTree(huffmanTree.get(leftChild), 0);
-        setCodeInHuffmanTree(huffmanTree.get(rightChild), 1);
+        setCodeInHuffmanTree(huffmanTree.get(leftChild), "0");
+        setCodeInHuffmanTree(huffmanTree.get(rightChild), "1");
     }
 
     /**
-     * 设置本结点赫夫曼编码，若本结点为叶子节点则返回，否则进入左右孩子
+     * 设置结点赫夫曼编码，若本结点为叶子节点则设置后返回，否则进入左右孩子
      * @param huffmanInfo 某一节点，或为叶子，或有左右孩子
-     * @param i 本结点为其双亲节点左右孩子的标识符，0为左孩子，1为右孩子
+     * @param huffmanCode 本结点的赫夫曼编码
      */
-    private void setCodeInHuffmanTree(HuffmanInfo huffmanInfo, int i) {
-        StringBuilder stringBuilder = new StringBuilder();
-        HuffmanInfo parent;
-        //叶子节点，设置值
+    private void setCodeInHuffmanTree(HuffmanInfo huffmanInfo, String huffmanCode) {
         if (huffmanTree.get(huffmanInfo.getLeftChild()) == null) {
-            //父节点非根节点或为根节点
-            if (huffmanTree.get(huffmanInfo.getParent()).getHuffmanCode() != null) {
-                parent = huffmanTree.get(huffmanInfo.getParent());
-                stringBuilder.append(parent.getHuffmanCode()).append(i);
-            } else {
-                stringBuilder = new StringBuilder(Integer.toString(i));
-            }
-            huffmanInfo.setHuffmanCode(stringBuilder);
+            huffmanInfo.setHuffmanCode(huffmanCode);
             return;
         }
-        //普通节点（有子有父母）
-        if (huffmanTree.get(huffmanInfo.getParent()).getHuffmanCode() != null) {
-            parent = huffmanTree.get(huffmanInfo.getParent());
-            stringBuilder.append(parent.getHuffmanCode()).append(i);
-        } else {
-            stringBuilder = new StringBuilder(Integer.toString(i));
-        }
-        huffmanInfo.setHuffmanCode(stringBuilder);
         HuffmanInfo leftChild = huffmanTree.get(huffmanInfo.getLeftChild());
         HuffmanInfo rightChild = huffmanTree.get(huffmanInfo.getRightChild());
-        setCodeInHuffmanTree(leftChild, 0);
-        setCodeInHuffmanTree(rightChild, 1);
+        setCodeInHuffmanTree(leftChild, huffmanCode+"0");
+        setCodeInHuffmanTree(rightChild, huffmanCode+"1");
     }
 
     /**
@@ -173,7 +155,7 @@ public class Encode {
     private void buildDecodeTree() {
         for (Map.Entry<String, HuffmanInfo> entry : huffmanTree.entrySet()) {
             if (entry.getKey().length() == 1) {
-                decodeTree.put(entry.getValue().getHuffmanCode().toString(), entry.getKey());
+                decodeTree.put(entry.getValue().getHuffmanCode(), entry.getKey());
             }
         }
     }

@@ -8,11 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-/**
- * TODO Refactor method setCodeInHuffmanTree().
- * Set decodeTree when set set huffmanCode in leaf node.
- * Thus don't need to traversal the huffmanTree to build the decode tree.
- */
 @Getter
 @Setter
 public class Encode {
@@ -106,6 +101,7 @@ public class Encode {
         //只有一个节点
         if (huffmanTree.get(huffmanInfo.getLeftChild()) == null) {
             huffmanInfo.setHuffmanCode("0");
+            decodeTree.put("0", huffmanInfo.getCode());
             return;
         }
         String leftChild = huffmanInfo.getLeftChild();
@@ -122,6 +118,7 @@ public class Encode {
     private void setCodeInHuffmanTree(HuffmanInfo huffmanInfo, String huffmanCode) {
         if (huffmanTree.get(huffmanInfo.getLeftChild()) == null) {
             huffmanInfo.setHuffmanCode(huffmanCode);
+            decodeTree.put(huffmanCode, huffmanInfo.getCode());
             return;
         }
         HuffmanInfo leftChild = huffmanTree.get(huffmanInfo.getLeftChild());
@@ -149,21 +146,10 @@ public class Encode {
      * @param decodeStringString 要解码的字符串
      */
     public void decodeString(StringBuilder decodeStringString) {
-        buildDecodeTree();
         result = decode(decodeStringString);
         System.out.println(result);
     }
 
-    /**
-     * 构建解码树提高解码效率
-     */
-    private void buildDecodeTree() {
-        for (Map.Entry<String, HuffmanInfo> entry : huffmanTree.entrySet()) {
-            if (entry.getKey().length() == 1) {
-                decodeTree.put(entry.getValue().getHuffmanCode(), entry.getKey());
-            }
-        }
-    }
 
     /**
      * 通过最长子串匹配解码树中深度最大的编码并解码

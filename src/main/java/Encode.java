@@ -8,6 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+/**
+ * TODO Refactor method setCodeInHuffmanTree().
+ * Set decodeTree when set set huffmanCode in leaf node.
+ * Thus don't need to traversal the huffmanTree to build the decode tree.
+ */
 @Getter
 @Setter
 public class Encode {

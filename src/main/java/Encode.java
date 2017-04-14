@@ -11,16 +11,11 @@ import java.util.PriorityQueue;
 @Getter
 @Setter
 public class Encode {
-
     private HashMap<String, HuffmanInfo> huffmanTree = new HashMap<>();
     private HashMap<String, String> decodeTree = new HashMap<>();
     private String inputString;
     private String root;
     private String result;
-
-    public HashMap<String, HuffmanInfo> getHuffmanTree() {
-        return huffmanTree;
-    }
 
     /**
      * 执行编码函数，并输出结果
@@ -32,7 +27,7 @@ public class Encode {
         buildHuffmanTree();
         setCodeInHuffmanTree();
         result = encodedCode();
-        System.out.println(result);
+        System.out.println("编码后的字符: " + result);
     }
 
     /**
@@ -69,7 +64,7 @@ public class Encode {
         HuffmanInfo huffmanInfo;
         PriorityQueue<CreateHuffman> priorityQueue = new PriorityQueue<>(new HuffmanComparator());
         for (Map.Entry<String, HuffmanInfo> entry : huffmanTree.entrySet()) {
-            code = entry.getValue().getCode();
+            code = entry.getKey();
             weight = entry.getValue().getWeight();
             createHuffman = new CreateHuffman(code, weight);
             priorityQueue.add(createHuffman);
@@ -147,7 +142,7 @@ public class Encode {
      */
     public void decodeString(StringBuilder decodeStringString) {
         result = decode(decodeStringString);
-        System.out.println(result);
+        System.out.println("解码后的字符: " + result);
     }
 
 

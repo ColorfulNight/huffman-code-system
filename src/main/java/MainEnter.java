@@ -8,7 +8,7 @@ public class MainEnter {
         Encode encode = new Encode();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
-        System.out.println("输入要编码的字符");
+        System.out.print("输入编码字符: ");
         try {
             inputString.append(bufferedReader.readLine());
         } catch (IOException e) {
@@ -18,7 +18,7 @@ public class MainEnter {
 
         inputString.delete(0,inputString.length()+1);
 
-        System.out.println("输入解码字符");
+        System.out.print("输入解码字符: ");
         try {
             inputString.append(bufferedReader.readLine());
         } catch (IOException e) {

@@ -19,6 +19,7 @@ public class Encode {
 
     /**
      * 执行编码函数，并输出结果
+     *
      * @param stringBuilder 输入的待编码字符串
      */
     public void encodeString(StringBuilder stringBuilder) {
@@ -39,7 +40,7 @@ public class Encode {
         for (int i = 0; i < inputString.length(); i++) {
             str = inputString.substring(i, i + 1);
             if (huffmanTree.get(str) != null) {
-                huffmanTree.get(str).setTimes(huffmanTree.get(str).getTimes()+1);
+                huffmanTree.get(str).setTimes(huffmanTree.get(str).getTimes() + 1);
                 HuffmanInfo.total++;
                 continue;
             }
@@ -107,6 +108,7 @@ public class Encode {
 
     /**
      * 设置结点赫夫曼编码，若本结点为叶子节点则设置后返回，否则进入左右孩子
+     *
      * @param huffmanInfo 某一节点，或为叶子，或有左右孩子
      * @param huffmanCode 本结点的赫夫曼编码
      */
@@ -118,12 +120,13 @@ public class Encode {
         }
         HuffmanInfo leftChild = huffmanTree.get(huffmanInfo.getLeftChild());
         HuffmanInfo rightChild = huffmanTree.get(huffmanInfo.getRightChild());
-        setCodeInHuffmanTree(leftChild, huffmanCode+"0");
-        setCodeInHuffmanTree(rightChild, huffmanCode+"1");
+        setCodeInHuffmanTree(leftChild, huffmanCode + "0");
+        setCodeInHuffmanTree(rightChild, huffmanCode + "1");
     }
 
     /**
      * 对输入的字符按赫夫曼编码进行编码
+     *
      * @return 编码后的字符串
      */
     private String encodedCode() {
@@ -138,45 +141,36 @@ public class Encode {
 
     /**
      * 执行解码并输出结果
-     * @param decodeStringString 要解码的字符串
-     */
-    public void decodeString(StringBuilder decodeStringString) {
-        result = decode(decodeStringString);
-        System.out.println("解码后的字符: " + result);
-    }
-
-
-    /**
-     * 通过最长子串匹配解码树中深度最大的编码并解码
+     *
      * @param decodeString 要解码的字符串
-     * @return 解码后的字符串
      */
-    private String decode(StringBuilder decodeString) {
+    public void decodeString(StringBuilder decodeString) {
         int i = 1;
         String code;
         String nextCode;
         StringBuilder result = new StringBuilder();
         while (i <= decodeString.length()) {
-            code = decodeString.substring(0,i);
-            if (decodeTree.get(code) == null){
+            code = decodeString.substring(0, i);
+            if (decodeTree.get(code) == null) {
                 i++;
                 continue;
             }
-            if (i+1 <=decodeString.length()){
-                nextCode = decodeString.substring(0,i+1);
-                if (decodeTree.get(nextCode)!=null){
+            if (i + 1 <= decodeString.length()) {
+                nextCode = decodeString.substring(0, i + 1);
+                if (decodeTree.get(nextCode) != null) {
                     i++;
                     continue;
                 }
                 result.append(decodeTree.get(code));
-                decodeString.delete(0,i);
+                decodeString.delete(0, i);
                 i = 1;
                 continue;
             }
             result.append(decodeTree.get(code));
-            decodeString.delete(0,i);
+            decodeString.delete(0, i);
         }
-        return result.toString();
+        this.result = result.toString();
+        System.out.println("解码后的字符: " + result);
     }
 }
 
@@ -206,4 +200,3 @@ class CreateHuffman {
     private String code;
     private float weight;
 }
-

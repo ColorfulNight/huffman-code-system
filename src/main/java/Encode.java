@@ -3,32 +3,39 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+/**
+ * TODO 序列化解码树
+ */
 @Getter
 @Setter
-public class Encode {
+public class Encode implements Action {
     private HashMap<String, HuffmanInfo> huffmanTree = new HashMap<>();
     private HashMap<String, String> decodeTree = new HashMap<>();
     private String inputString;
     private String root;
     private String result;
+    final String inputPath = "D:\\encode.txt";
+    final String outputPath = "D:\\encoded.txt";
 
     /**
      * 执行编码函数，并输出结果
      *
-     * @param stringBuilder 输入的待编码字符串
+     * @param string 输入的待编码字符串
      */
-    public void encodeString(StringBuilder stringBuilder) {
-        setInputString(stringBuilder.toString());
+    public String action(String string) {
+        setInputString(string);
         calculateNode();
         buildHuffmanTree();
         setCodeInHuffmanTree();
         result = encodedCode();
-        System.out.println("编码后的字符: " + result);
+        serializeDecodeTree();
+        return result;
     }
 
     /**
@@ -140,14 +147,82 @@ public class Encode {
     }
 
     /**
+     * 序列化赫夫曼树
+     */
+    private void serializeDecodeTree() {
+        FileOutputStream fileOutputStream = null;
+        ObjectOutputStream objectOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(path);
+            objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(decodeTree);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (objectOutputStream != null) {
+                try {
+                    objectOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+}
+
+/**
+ * TODO 完成解码类相关
+ * 解码类
+ */
+@Setter
+@Getter
+class Decode implements Action {
+    private HashMap<String, String> decodeTree = new HashMap<>();
+    final String inputPath = "D:\\decode.txt";
+    final String outputPath = "D:\\decoded.txt";
+
+    /**
+     * 解码工作方法
+     */
+    public String action(String string) {
+        unserializeDecodeTree();
+        return decodeString(string);
+    }
+
+    /**
+     * 反序列化解码树对象
+     */
+    @SuppressWarnings("unchecked")
+    private void unserializeDecodeTree() {
+        FileInputStream fileInputStream = null;
+        ObjectInputStream objectInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(path);
+            objectInputStream = new ObjectInputStream(fileInputStream);
+            decodeTree = (HashMap<String, String>) objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 执行解码并输出结果
      *
-     * @param decodeString 要解码的字符串
+     * @param string 要解码的字符串
      */
-    public void decodeString(StringBuilder decodeString) {
+    private String decodeString(String string) {
         int i = 1;
         String code;
         String nextCode;
+        StringBuilder decodeString = new StringBuilder(string);
         StringBuilder result = new StringBuilder();
         while (i <= decodeString.length()) {
             code = decodeString.substring(0, i);
@@ -169,8 +244,7 @@ public class Encode {
             result.append(decodeTree.get(code));
             decodeString.delete(0, i);
         }
-        this.result = result.toString();
-        System.out.println("解码后的字符: " + result);
+        return result.toString();
     }
 }
 

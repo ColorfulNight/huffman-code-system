@@ -2,8 +2,8 @@
 //@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 //public class EncodeTest {
 //    private static Encode encode;
-//    private static HuffmanInfo[] actualEncode = new HuffmanInfo[3];
-//    private static Map<String, HuffmanInfo> huffmanTree;
+//    private static HuffmanNode[] actualEncode = new HuffmanNode[3];
+//    private static Map<String, HuffmanNode> huffmanTree;
 //
 //    @BeforeClass
 //    public static void beforeAll() {
@@ -27,7 +27,7 @@
 //    @Test
 //    public void test2CalculateNode() {
 //        /* 测试总数*/
-//        Assert.assertEquals(8, HuffmanInfo.total);
+//        Assert.assertEquals(8, HuffmanNode.total);
 //        /* 测试次数计算 */
 //        Integer[] expectedTime = {3, 2, 1};
 //        Integer[] actualTimes = new Integer[3];

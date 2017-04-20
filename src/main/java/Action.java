@@ -1,10 +1,11 @@
 
 public interface Action {
-    String path = "D:\\decodeTree.ser";
 
-    String action(String s);
+    String action();
 
-    String getInputPath();
+    void setInputString(String inputString);
 
-    String getOutputPath();
+    void input();
+
+    void output();
 }

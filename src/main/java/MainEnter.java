@@ -1,4 +1,4 @@
-import java.io.*;
+import java.io.File;
 import java.util.Scanner;
 
 /**
@@ -8,13 +8,13 @@ public class MainEnter {
     public static void main(String[] args) {
         System.out.println("*********************");
         System.out.println("编码：");
-        action(new Encode());
-        System.out.println("*********************");
-        System.out.println("解码：");
-        action(new Decode());
+        task(new Encode());
+//        System.out.println("*********************");
+//        System.out.println("解码：");
+//        task(new Decode());
     }
 
-    private static void action(Action action) {
+    private static void task(Action action) {
         MainEnter mainEnter = new MainEnter();
         int type;
         Scanner scanner;
@@ -25,12 +25,13 @@ public class MainEnter {
             scanner = new Scanner(System.in);
             System.out.print("输入字符: ");
             string = scanner.nextLine();
-            result = action.action(string);
+            action.setInputString(string);
+            result = action.action();
             System.out.println(result);
         } else {
-            string = mainEnter.fileInput(action.getInputPath());
-            result = action.action(string);
-            mainEnter.fileOutput(result, action.getOutputPath());
+            action.input();
+            action.action();
+            action.output();
         }
     }
 
@@ -39,39 +40,6 @@ public class MainEnter {
         System.out.println("选择" + type + "种类：1为控制台，2为从文本文件");
         Scanner scanner = new Scanner(System.in);
         return scanner.nextInt();
-    }
-
-    private String fileInput(String filePath) {
-        File file = new File(filePath);
-        StringBuilder stringInFile = new StringBuilder();
-        FileReader fileReader = null;
-        BufferedReader bufferedReader = null;
-        try {
-            fileReader = new FileReader(file);
-            bufferedReader = new BufferedReader(fileReader);
-            String buffer;
-            while ((buffer = bufferedReader.readLine()) != null) {
-                stringInFile.append(buffer).append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (fileReader != null) {
-                try {
-                    fileReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return stringInFile.toString();
     }
 
     private void fileOutput(String result, String filePath) {
@@ -102,12 +70,6 @@ public class MainEnter {
 //            }
 //        }
 
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-            byte[] bs = result.getBytes();
-            fileOutputStream.write(bs);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 }

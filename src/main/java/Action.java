@@ -4,7 +4,7 @@ public interface Action {
 
     String action(String s);
 
-    String getInputPath();
+    void output();
 
-    String getOutputPath();
+    void input();
 }

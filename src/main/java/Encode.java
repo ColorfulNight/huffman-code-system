@@ -1,13 +1,8 @@
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.*;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  * TODO 序列化解码树
@@ -29,12 +24,19 @@ public class Encode implements Action {
      * @param string 输入的待编码字符串
      */
     public String action(String string) {
-        setInputString(string);
+        if (string != null) {
+            setInputString(string);
+        } else {
+            input();
+        }
         calculateNode();
         buildHuffmanTree();
         setCodeInHuffmanTree();
         result = encodedCode();
         serializeDecodeTree();
+        if (string == null) {
+            output();
+        }
         return result;
     }
 
@@ -66,29 +68,23 @@ public class Encode implements Action {
     private void buildHuffmanTree() {
         String code;
         float weight;
-        CreateHuffman createHuffman;
-        CreateHuffman createHuffman1;
-        CreateHuffman newNode;
-        HuffmanInfo huffmanInfo;
-        PriorityQueue<CreateHuffman> priorityQueue = new PriorityQueue<>(new HuffmanComparator());
-        for (Map.Entry<String, HuffmanInfo> entry : huffmanTree.entrySet()) {
-            code = entry.getKey();
-            weight = entry.getValue().getWeight();
-            createHuffman = new CreateHuffman(code, weight);
-            priorityQueue.add(createHuffman);
-        }
+        HuffmanInfo newNode;
+        HuffmanInfo first;
+        HuffmanInfo second;
+        PriorityQueue<HuffmanInfo> priorityQueue = new PriorityQueue<>();
+        ArrayList<HuffmanInfo> list = new ArrayList<>(huffmanTree.values());
+        priorityQueue.addAll(list);
         while (priorityQueue.size() > 1) {
-            createHuffman = priorityQueue.poll();
-            createHuffman1 = priorityQueue.poll();
-            code = createHuffman.getCode() + createHuffman1.getCode();
-            weight = createHuffman.getWeight() + createHuffman1.getWeight();
-            huffmanInfo = new HuffmanInfo(weight, code);
-            huffmanInfo.setLeftChild(huffmanTree.get(createHuffman.getCode()).getCode());
-            huffmanInfo.setRightChild(huffmanTree.get(createHuffman1.getCode()).getCode());
-            huffmanTree.get(createHuffman.getCode()).setParent(code);
-            huffmanTree.get(createHuffman1.getCode()).setParent(code);
-            huffmanTree.put(code, huffmanInfo);
-            newNode = new CreateHuffman(code, weight);
+            first = priorityQueue.poll();
+            second = priorityQueue.poll();
+            code = first.getCode() + second.getCode();
+            weight = first.getWeight() + second.getWeight();
+            newNode = new HuffmanInfo(weight, code);
+            newNode.setLeftChild(first.getCode());
+            newNode.setRightChild(second.getCode());
+            first.setParent(code);
+            second.setParent(code);
+            huffmanTree.put(code, newNode);
             priorityQueue.add(newNode);
         }
         root = priorityQueue.poll().getCode();
@@ -138,12 +134,13 @@ public class Encode implements Action {
      */
     private String encodedCode() {
         HuffmanInfo huffmanInfo;
-        StringBuilder result = new StringBuilder();
+        StringBuilder temp = new StringBuilder();
         for (int i = 0; i < inputString.length(); i++) {
             huffmanInfo = huffmanTree.get(inputString.substring(i, i + 1));
-            result.append(huffmanInfo.getHuffmanCode());
+            temp.append(huffmanInfo.getHuffmanCode());
         }
-        return result.toString();
+        decodeTree.put("resultLength", String.valueOf(temp.length()));
+        return temp.toString();
     }
 
     /**
@@ -176,101 +173,67 @@ public class Encode implements Action {
         }
 
     }
-}
 
-/**
- * TODO 完成解码类相关
- * 解码类
- */
-@Setter
-@Getter
-class Decode implements Action {
-    private HashMap<String, String> decodeTree = new HashMap<>();
-    final String inputPath = "D:\\decode.txt";
-    final String outputPath = "D:\\decoded.txt";
-
-    /**
-     * 解码工作方法
-     */
-    public String action(String string) {
-        unserializeDecodeTree();
-        return decodeString(string);
+    private byte[] packEncodedCharsToByte() {
+        BitSet bitSet = new BitSet();
+        String temp;
+        for (int i = 0; i < result.length(); i++) {
+            temp = result.substring(i, i + 1);
+            if (Integer.valueOf(temp) == 1) {
+                bitSet.set(i);
+            } else {
+                bitSet.clear(i);
+            }
+        }
+        return bitSet.toByteArray();
     }
 
-    /**
-     * 反序列化解码树对象
-     */
-    @SuppressWarnings("unchecked")
-    private void unserializeDecodeTree() {
-        FileInputStream fileInputStream = null;
-        ObjectInputStream objectInputStream = null;
+    @Override
+    public void output() {
+        byte[] bytes = packEncodedCharsToByte();
+        FileOutputStream fileOutputStream;
         try {
-            fileInputStream = new FileInputStream(path);
-            objectInputStream = new ObjectInputStream(fileInputStream);
-            decodeTree = (HashMap<String, String>) objectInputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+            fileOutputStream = new FileOutputStream(new File(outputPath));
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byteArrayOutputStream.write(bytes);
+            byteArrayOutputStream.writeTo(fileOutputStream);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * 执行解码并输出结果
-     *
-     * @param string 要解码的字符串
-     */
-    private String decodeString(String string) {
-        int i = 1;
-        String code;
-        String nextCode;
-        StringBuilder decodeString = new StringBuilder(string);
-        StringBuilder result = new StringBuilder();
-        while (i <= decodeString.length()) {
-            code = decodeString.substring(0, i);
-            if (decodeTree.get(code) == null) {
-                i++;
-                continue;
-            }
-            if (i + 1 <= decodeString.length()) {
-                nextCode = decodeString.substring(0, i + 1);
-                if (decodeTree.get(nextCode) != null) {
-                    i++;
-                    continue;
-                }
-                result.append(decodeTree.get(code));
-                decodeString.delete(0, i);
-                i = 1;
-                continue;
-            }
-            result.append(decodeTree.get(code));
-            decodeString.delete(0, i);
-        }
-        return result.toString();
-    }
-}
-
-/**
- * 用于构建huffman树时的Comparator
- */
-class HuffmanComparator implements Comparator<CreateHuffman> {
-
     @Override
-    public int compare(CreateHuffman o1, CreateHuffman o2) {
-        if (o1.getWeight() > o2.getWeight())
-            return 1;
-        if (o2.getWeight() > o1.getWeight())
-            return -1;
-        return 0;
+    public void input() {
+        File file = new File(inputPath);
+        StringBuilder stringInFile = new StringBuilder();
+        FileReader fileReader = null;
+        BufferedReader bufferedReader = null;
+        try {
+            fileReader = new FileReader(file);
+            bufferedReader = new BufferedReader(fileReader);
+            String buffer;
+            while ((buffer = bufferedReader.readLine()) != null) {
+                stringInFile.append(buffer).append("\n");
+            }
+            stringInFile.deleteCharAt(stringInFile.length() - 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (fileReader != null) {
+                try {
+                    fileReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        setInputString(stringInFile.toString());
     }
-}
-
-/**
- * 构建huffman树时的辅助类
- */
-@Setter
-@Getter
-@AllArgsConstructor
-@EqualsAndHashCode
-class CreateHuffman {
-    private String code;
-    private float weight;
 }

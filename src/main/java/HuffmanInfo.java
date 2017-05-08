@@ -1,14 +1,13 @@
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
 /**
  * The type Huffman info.
  */
 @Setter
 @Getter
 @ToString
-public class HuffmanInfo {
+public class HuffmanInfo implements Comparable<HuffmanInfo> {
     /**
      * 叶子节点总数，用于计算权值.
      */
@@ -61,17 +60,14 @@ public class HuffmanInfo {
         return result;
     }
 
-    /**
-     * 测试用
-     */
-    @Deprecated
-    public HuffmanInfo(int times, float weight, String code, String huffmanCode, String leftChild, String rightChild, String parent) {
-        this.times = times;
-        this.weight = weight;
-        this.code = code;
-        this.huffmanCode = huffmanCode;
-        this.leftChild = leftChild;
-        this.rightChild = rightChild;
-        this.parent = parent;
+    @Override
+    public int compareTo(HuffmanInfo o) {
+        if (this.getWeight() > o.getWeight()) {
+            return 1;
+        }
+        if (this.getWeight() < o.getWeight()) {
+            return -1;
+        }
+        return 0;
     }
 }

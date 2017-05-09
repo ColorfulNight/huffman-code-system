@@ -8,56 +8,20 @@ import lombok.ToString;
 @Getter
 @ToString
 public class HuffmanInfo implements Comparable<HuffmanInfo> {
-    /**
-     * 叶子节点总数，用于计算权值.
-     */
-    static int total = 0;
     private int times = 1;
     private float weight = 0.0f;
-    private String code;
+    private Byte code;
     private String huffmanCode;
-    private String leftChild = null;
-    private String rightChild = null;
-    private String parent = null;
+    private HuffmanInfo leftChild = null;
+    private HuffmanInfo rightChild = null;
+    private HuffmanInfo parent = null;
 
-
-    public HuffmanInfo(String code) {
+    public HuffmanInfo(Byte code) {
         this.code = code;
-        total++;
     }
 
-    public HuffmanInfo(float weight, String code) {
+    public HuffmanInfo(float weight) {
         this.weight = weight;
-        this.code = code;
-        total++;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        HuffmanInfo that = (HuffmanInfo) o;
-
-        if (times != that.times) return false;
-        if (Float.compare(that.weight, weight) != 0) return false;
-        if (!code.equals(that.code)) return false;
-        if (huffmanCode != null ? !huffmanCode.equals(that.huffmanCode) : that.huffmanCode != null) return false;
-        if (leftChild != null ? !leftChild.equals(that.leftChild) : that.leftChild != null) return false;
-        if (rightChild != null ? !rightChild.equals(that.rightChild) : that.rightChild != null) return false;
-        return parent != null ? parent.equals(that.parent) : that.parent == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = times;
-        result = 31 * result + (weight != +0.0f ? Float.floatToIntBits(weight) : 0);
-        result = 31 * result + code.hashCode();
-        result = 31 * result + (huffmanCode != null ? huffmanCode.hashCode() : 0);
-        result = 31 * result + (leftChild != null ? leftChild.hashCode() : 0);
-        result = 31 * result + (rightChild != null ? rightChild.hashCode() : 0);
-        result = 31 * result + (parent != null ? parent.hashCode() : 0);
-        return result;
     }
 
     @Override

@@ -10,10 +10,12 @@ import java.util.*;
 @Getter
 @Setter
 public class Encode implements Action {
-    private HashMap<String, HuffmanInfo> huffmanTree = new HashMap<>();
-    private HashMap<String, String> decodeTree = new HashMap<>();
+    private HashMap<Byte, HuffmanInfo> huffmanTreeLeaves = new HashMap<>();
+    private HashMap<String, Byte> decodeTree = new HashMap<>();
     private String inputString;
-    private String root;
+    private int total;
+    private Byte[] inputBytes;
+    private HuffmanInfo root;
     private String result;
     final String inputPath = "D:\\encode.txt";
     final String outputPath = "D:\\encoded.txt";
@@ -24,19 +26,13 @@ public class Encode implements Action {
      * @param string 输入的待编码字符串
      */
     public String action(String string) {
-        if (string != null) {
-            setInputString(string);
-        } else {
-            input();
-        }
+        input();
         calculateNode();
         buildHuffmanTree();
         setCodeInHuffmanTree();
         result = encodedCode();
         serializeDecodeTree();
-        if (string == null) {
-            output();
-        }
+        output();
         return result;
     }
 
@@ -44,20 +40,19 @@ public class Encode implements Action {
      * 初始化叶子节点,计算叶子节点权值
      */
     private void calculateNode() {
-        String str;
         HuffmanInfo huffmanInfo;
-        for (int i = 0; i < inputString.length(); i++) {
-            str = inputString.substring(i, i + 1);
-            if (huffmanTree.get(str) != null) {
-                huffmanTree.get(str).setTimes(huffmanTree.get(str).getTimes() + 1);
-                HuffmanInfo.total++;
+        for (byte b : inputBytes) {
+            if (huffmanTreeLeaves.get(b) != null) {
+                huffmanTreeLeaves.get(b).setTimes(huffmanTreeLeaves.get(b).getTimes() + 1);
+                total++;
                 continue;
             }
-            huffmanTree.put(str, new HuffmanInfo(str));
+            huffmanTreeLeaves.put(b, new HuffmanInfo(new Byte(b)));
+            total++;
         }
-        for (Map.Entry<String, HuffmanInfo> entry : huffmanTree.entrySet()) {
+        for (Map.Entry<Byte, HuffmanInfo> entry : huffmanTreeLeaves.entrySet()) {
             huffmanInfo = entry.getValue();
-            float weight = (float) huffmanInfo.getTimes() / HuffmanInfo.total;
+            float weight = (float) huffmanInfo.getTimes() / total;
             huffmanInfo.setWeight(weight);
         }
     }
@@ -66,28 +61,25 @@ public class Encode implements Action {
      * 根据权值生成赫夫曼树
      */
     private void buildHuffmanTree() {
-        String code;
         float weight;
         HuffmanInfo newNode;
         HuffmanInfo first;
         HuffmanInfo second;
         PriorityQueue<HuffmanInfo> priorityQueue = new PriorityQueue<>();
-        ArrayList<HuffmanInfo> list = new ArrayList<>(huffmanTree.values());
+        ArrayList<HuffmanInfo> list = new ArrayList<>(huffmanTreeLeaves.values());
         priorityQueue.addAll(list);
         while (priorityQueue.size() > 1) {
             first = priorityQueue.poll();
             second = priorityQueue.poll();
-            code = first.getCode() + second.getCode();
             weight = first.getWeight() + second.getWeight();
-            newNode = new HuffmanInfo(weight, code);
-            newNode.setLeftChild(first.getCode());
-            newNode.setRightChild(second.getCode());
-            first.setParent(code);
-            second.setParent(code);
-            huffmanTree.put(code, newNode);
+            newNode = new HuffmanInfo(weight);
+            newNode.setLeftChild(first);
+            newNode.setRightChild(second);
+            first.setParent(newNode);
+            second.setParent(newNode);
             priorityQueue.add(newNode);
         }
-        root = priorityQueue.poll().getCode();
+        root = priorityQueue.poll();
     }
 
     /**
@@ -96,17 +88,14 @@ public class Encode implements Action {
      * 否则进入左右孩子节点。
      */
     private void setCodeInHuffmanTree() {
-        HuffmanInfo huffmanInfo = huffmanTree.get(root);
         //只有一个节点
-        if (huffmanTree.get(huffmanInfo.getLeftChild()) == null) {
-            huffmanInfo.setHuffmanCode("0");
-            decodeTree.put("0", huffmanInfo.getCode());
+        if (root.getLeftChild() == null) {
+            root.setHuffmanCode("0");
+            decodeTree.put("0", root.getCode());
             return;
         }
-        String leftChild = huffmanInfo.getLeftChild();
-        String rightChild = huffmanInfo.getRightChild();
-        setCodeInHuffmanTree(huffmanTree.get(leftChild), "0");
-        setCodeInHuffmanTree(huffmanTree.get(rightChild), "1");
+        setCodeInHuffmanTree(root.getLeftChild(), "0");
+        setCodeInHuffmanTree(root.getRightChild(), "1");
     }
 
     /**
@@ -116,13 +105,13 @@ public class Encode implements Action {
      * @param huffmanCode 本结点的赫夫曼编码
      */
     private void setCodeInHuffmanTree(HuffmanInfo huffmanInfo, String huffmanCode) {
-        if (huffmanTree.get(huffmanInfo.getLeftChild()) == null) {
+        if (huffmanInfo.getLeftChild() == null) {
             huffmanInfo.setHuffmanCode(huffmanCode);
             decodeTree.put(huffmanCode, huffmanInfo.getCode());
             return;
         }
-        HuffmanInfo leftChild = huffmanTree.get(huffmanInfo.getLeftChild());
-        HuffmanInfo rightChild = huffmanTree.get(huffmanInfo.getRightChild());
+        HuffmanInfo leftChild = huffmanInfo.getLeftChild();
+        HuffmanInfo rightChild = huffmanInfo.getRightChild();
         setCodeInHuffmanTree(leftChild, huffmanCode + "0");
         setCodeInHuffmanTree(rightChild, huffmanCode + "1");
     }
@@ -135,11 +124,10 @@ public class Encode implements Action {
     private String encodedCode() {
         HuffmanInfo huffmanInfo;
         StringBuilder temp = new StringBuilder();
-        for (int i = 0; i < inputString.length(); i++) {
-            huffmanInfo = huffmanTree.get(inputString.substring(i, i + 1));
+        for (byte b : inputBytes) {
+            huffmanInfo = huffmanTreeLeaves.get(b);
             temp.append(huffmanInfo.getHuffmanCode());
         }
-        decodeTree.put("resultLength", String.valueOf(temp.length()));
         return temp.toString();
     }
 
@@ -205,35 +193,33 @@ public class Encode implements Action {
     @Override
     public void input() {
         File file = new File(inputPath);
-        StringBuilder stringInFile = new StringBuilder();
-        FileReader fileReader = null;
-        BufferedReader bufferedReader = null;
+
+        FileInputStream fileInputStream = null;
+        int length;
+        byte[] bytes = new byte[1024];
+        ArrayList<Byte> arrayList = new ArrayList<>();
         try {
-            fileReader = new FileReader(file);
-            bufferedReader = new BufferedReader(fileReader);
-            String buffer;
-            while ((buffer = bufferedReader.readLine()) != null) {
-                stringInFile.append(buffer).append("\n");
+            fileInputStream = new FileInputStream(file);
+            while ((length = fileInputStream.read(bytes)) != -1) {
+//                arrayList.addAll(Arrays.asList(ArrayUtils.toObject(bytes)));
+                for (int i = 0; i < length; i++) {
+                    arrayList.add(bytes[i]);
+                }
             }
-            stringInFile.deleteCharAt(stringInFile.length() - 1);
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (bufferedReader != null) {
+            if (fileInputStream != null) {
                 try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (fileReader != null) {
-                try {
-                    fileReader.close();
+                    fileInputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-        setInputString(stringInFile.toString());
+        Byte[] temp = new Byte[arrayList.size()];
+        arrayList.toArray(temp);
+        setInputBytes(temp);
     }
 }
